@@ -138,7 +138,7 @@ array<array<int, down>, across> NewBoard( array<array<int, down>, across> board 
 
 void DrawBoard( array<array<int, down>, across> board )
 {
-
+	system( "cls" );		//Clears screen
 	for ( int x = 0; x < down; x++ )
 	{
 		for ( int y = 0; y < across; y++ )

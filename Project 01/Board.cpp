@@ -70,6 +70,7 @@ namespace BoardNS
 
 	void Board::DrawBoard()
 	{
+		system( "cls" );		//Clears screen
 		//cout << "Down = " << down << "     Across = " << across << endl;
 		for ( unsigned int x = 0; x < GetBoard().size(); x++ )
 		{
