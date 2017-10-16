@@ -9,7 +9,7 @@ void DrawBoard( array<array<int, down>, across> board );	//draw original board
 array<array<int, down>, across> NewBoard( array<array<int, down>, across> board );		//determines what new board looks like
 void copy( array<array<int, down>, across> board, array<array<int, down>, across> board2 ); //copies new generation to original generation
 
-int main()
+int Notmain()
 {
 	char repeat;
 
