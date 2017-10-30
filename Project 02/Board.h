@@ -16,24 +16,26 @@ namespace BoardNS
 		int across;
 		int down;
 		const int defaultSize = 10;
-		vector< vector<int> > board;
+		vector< vector<Species> > board;
 		//array<array<int, across>, down> board;
 		int deadIdentifier;
 
 	public:
 		Board();
-		Board( vector<vector<int>> );
+		Board( vector<vector<Species>> );
 		Board( int, int );
-		void ConstructBoard( vector<vector<int>> );
+		vector<vector<Species>> ParseIntBoard( vector<vector<int>> );
+		void ConstructBoard( vector<vector<Species>> );
 		void DrawBoard();
 		void UpdateBoard();
 		vector< vector<int> > Board::CheckBounds( int, int, vector< vector<int> > );
-		int CheckDirections( int, int, vector< vector<int> > );
-		int NeighborBehavior( int, int );
-		void SetBoard( vector<vector<int>> );
+		Species CheckDirections( int, int, vector< vector<int> > );
+		Species NeighborBehavior( Species, int );
+		Species NeighborConflict( vector<int> );
+		void SetBoard( vector<vector<Species>> );
 		void SetHeight( int );
 		void SetWidth( int );
-		vector< vector<int> > GetBoard();
+		vector< vector<Species> > GetBoard();
 		int GetHeight();
 		int GetWidth();
 

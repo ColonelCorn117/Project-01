@@ -12,9 +12,13 @@ int main()
 	char repeat = ' ';
 
 	//Create board, populate it with species identifiers, run time ticks
+	Species deadSpec(0, 0);
+	Species::AddSpecToList( deadSpec, Species::GetSpecList() );
+	Species instSpec;	//Species instance. Class keyword needed or constructor isn't found
+	Species::AddSpecToList( instSpec, Species::GetSpecList() );
 	Board instBoard;	//Board instance
-	Species instSpec;	//Species instance
-	Species::AddSpecToList( instSpec, Species::GetSpecList() );	//GetSpecList return reference instead?
+	
+	
 
 	do
 	{

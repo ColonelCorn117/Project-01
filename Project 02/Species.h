@@ -20,10 +20,11 @@ namespace SpeciesNS
 		vector<Species> helpedBy;
 
 	public:
-		Species();
-		Species( int, int );
+		//Species();
+		Species( int = 2, int = 3 );
 		static void AddSpecToList( Species, vector<Species> );
 		static vector<Species> GetSpecList();
+		static Species GetSpeciesFromID( int );
 		vector<Species> GetHelpers();
 		vector<Species> GetKillers();
 		int GetIdentifier();

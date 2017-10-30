@@ -13,18 +13,18 @@ namespace SpeciesNS
 
 	//************************************************
 
-	Species::Species() : Species( 2, 3 )	//Calls other constructor using default values
-	{
-		//nothing
-	}
+	//Species::Species() : Species( 2, 3 )	//Calls other constructor using default values
+	//{
+	//	//nothing
+	//}
 
 	//************************************************
 
 	Species::Species( int minAdj, int maxAdj )
 	{
 		//cout << specList.size();
-		int newSpec = GetSpecList().size() + 1;
-		SetIdentifier( newSpec );
+		int id = GetSpecList().size();
+		SetIdentifier( id );
 		SetMinAdj( minAdj );
 		SetMaxAdj( maxAdj );
 		//specList.resize( newSpec );
@@ -45,6 +45,13 @@ namespace SpeciesNS
 	vector<Species> Species::GetSpecList()
 	{
 		return Species::specList;
+	}
+
+	//************************************************
+
+	Species Species::GetSpeciesFromID(int id)
+	{
+		return GetSpecList()[id];
 	}
 
 	//************************************************
