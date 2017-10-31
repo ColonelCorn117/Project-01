@@ -36,7 +36,7 @@ namespace SpeciesNS
 	void Species::AddSpecToList( Species spec, vector<Species> list )
 	{
 		//list.resize( list.size() + 1 );
-		list.push_back( spec );			//Increase temp Species list size and adds this Species to the temp Species list
+		list.push_back( spec );			//Increase temp Species list size and add this Species to it
 		SetSpecList( list );			//Overwrite the Species lists with the temp
 	}
 

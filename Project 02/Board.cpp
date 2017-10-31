@@ -76,7 +76,6 @@ namespace BoardNS
 				{
 					specBoard[x][y] = Species::GetSpeciesFromID( intBoard[x][y] );
 				}
-				
 			}
 		}
 		
@@ -129,26 +128,22 @@ namespace BoardNS
 			{ 1, 1, 1 }
 		} };
 
-		vector< vector<int> > dirCheck = checkLayout;		//Copy checkLayout so we can make changes to the copy
-		//DBG_Print2DVector( newBoard );
-
+		vector< vector<int> > dirCheck;// = checkLayout;		//Copy checkLayout so we can make changes to the copy
+		
 		for ( unsigned int x = 0; x < GetBoard().size(); x++ )
 		{
 			for ( unsigned int y = 0; y < GetBoard()[x].size(); y++ )
 			{
-
 				dirCheck = CheckBounds( x, y, checkLayout );	//Check bounds to make sure we don't attempt to check out of bounds of an array
-				//cout << "DirCheck for row " << x << ", column " << y << endl;		//CheckDirections will print dirCheck
 				newBoard[x][y] = CheckDirections( x, y, dirCheck );
-				
 			}
 		}
-		//DBG_Print2DVector( newBoard );
 		SetBoard( newBoard );
 	}
 
 	//************************************************
 
+	//Modifies the 3x3 checkLayout vector based on the current position on the board
 	vector< vector<int> > Board::CheckBounds( int x, int y, vector< vector<int> > checkLayout )
 	{
 		//Check bounds
@@ -185,46 +180,57 @@ namespace BoardNS
 
 	//************************************************
 
+	//Check the neighbors of the current board square using the 3x3 checkLayout vector as a guide
 	Species Board::CheckDirections( int x, int y, vector< vector<int> > dirCheck )
 	{
 		int identifier = GetBoard()[x][y].GetIdentifier();
-		int neighbors = 0;
 		Species newValue;
-		enum checkType		//Refers to the Species that we are checking the neighbors of (i.e. This doesn't refer to the neighbors)
+
+		//Used for checking neighbors of living cells
+		int neighbors = 0;
+		Species currSpec( Species::GetSpeciesFromID( 0 ) );
+		vector<Species> helpers;
+		vector<Species> killers;
+
+		//Used for checking neighbors of dead cells
+		vector<int> possNeighbors;
+
+		//Refers to the Species that we are checking the neighbors of (i.e. This doesn't refer to the neighbors)
+		enum checkType
 		{
-			LIVING,
-			DEAD
+			DEAD,
+			LIVING
 		};
 
-		checkType type;
+		checkType thisType;
 		if ( identifier != 0 )		//Check neighbors of a living square
 		{
-			//Species currSpec = Species::GetSpecList()[identifier - 1];
-			Species currSpec = Species::GetSpeciesFromID( identifier );
-			vector<Species> helpers = currSpec.GetHelpers();
-			vector<Species> killers = currSpec.GetKillers();
-			type = LIVING;
+			currSpec = Species::GetSpeciesFromID( identifier );
+			helpers = currSpec.GetHelpers();
+			killers = currSpec.GetKillers();
+			thisType = LIVING;
 		}
 		else	//Check neighbors of a dead square
 		{
-			//DBG_PrintVector( Species::GetSpecList() );
-			//DBG_Print2DVector( dirCheck );
-
 			//The number of possible neighbor identifiers will be at most, the number of Species created. We're not going to count the "dead species", so subtract 1. Vector initialized to all 0.
-			vector<int> possNeighbors( Species::GetSpecList().size(), 0 );
-			type = DEAD;
+			possNeighbors.resize( Species::GetSpecList().size(), 0 );
+			thisType = DEAD;
 		}
+
 		for ( unsigned int a = 0; a < dirCheck.size(); a++ )
 		{
 			for ( unsigned int b = 0; b < dirCheck[a].size(); b++ )
 			{
 				if ( dirCheck[a][b] != 0 )	//Check in this direction
 				{
+					//cout << "[a][b] = [" << a << "][" << b << "]\n\n";
 					int neighborID = GetBoard()[x + a - 1][y + b - 1].GetIdentifier();
+					
 					if ( neighborID != 0 )	//Living neighbor...
 					{
-						if ( type == LIVING )
+						if ( thisType == LIVING )
 						{
+							
 							if ( neighborID == GetBoard()[x][y].GetIdentifier() )	//... of same species.
 							{
 								neighbors++;
@@ -250,36 +256,41 @@ namespace BoardNS
 								}
 							}
 						}
-						else if ( type == DEAD )
+						else if ( thisType == DEAD )
 						{
-							possNeighbors[neighborID]++;	//+1 living neighbor found with specific identifier.
+							possNeighbors[neighborID]++;	//+1 living neighbor found with specific identifier.	
 						}
-
+						else
+						{
+							cout << "\n\nError - checkType not properly assigned.\n\n";
+						}
 					}
 				}
 				//cout << dirCheck[a][b] << ' ';
 			}
 			//cout << endl;
 		}
-		if ( type == LIVING )
+		if ( thisType == LIVING )
 		{
 			newValue = NeighborBehavior( GetBoard()[x][y], neighbors );
 		}
-		else if ( type == DEAD )
+		else if ( thisType == DEAD )
 		{
-			NeighborConflict(possNeighbors);
+			newValue = NeighborConflict(possNeighbors);
 		}
 
 		//cout << "board[" << x << "][" <<y << "] has " << neighbors << " living neighbors. New value = " << newValue << endl;
+		
 		return newValue;
 	}
 
 	//************************************************
 
+	//Dictates how a living cell behaves based on its neighbor requirements
 	Species Board::NeighborBehavior(Species currSpec, int neighbors)
 	{
 		//cout << "Identfier = " << currSpec.GetIdentifier() << "     Neighbors = " << neighbors << endl;
-		Species newValue;
+		Species newValue( Species::GetSpeciesFromID( 0 ) );
 		if ( currSpec.GetIdentifier() != 0 )	//Living cell. Check if still alive.
 		{
 			//cout << "MinAdj = " << currSpec.GetMinAdj() << "     MaxAdj = " << currSpec.GetMaxAdj() << endl;
@@ -312,15 +323,15 @@ namespace BoardNS
 
 	//************************************************
 
+	//Handles conflicts where multiple species can reproduce onto one dead square
 	Species Board::NeighborConflict( vector<int> possNeighbors )
 	{
-		Species newValue;
+		Species newValue (Species::GetSpeciesFromID(0));
 		auto maxIterator = max_element( possNeighbors.begin(), possNeighbors.end() );		//maxIterator returns the iterator (pointer) with the highest value (not the value itself). Dereferencing gives the value AT the iterator.
 		int max = *maxIterator;		//Number of neighbors with the iterator: std::distance(possNeighbors.begin(), maxIterator) (std::distance() gives the value OF the iterator.)
 									//cout << "Max iter = " << distance( possNeighbors.begin(), maxIterator ) << "     Max = " << max << endl;
 		if ( max > 0 )
 		{
-
 			bool conflict = false;
 			for ( unsigned int i = 1; i < possNeighbors.size(); i++ )	//There may be a value equal to max, since max_element returns the iterator of the first value equal to the max
 			{
@@ -337,14 +348,13 @@ namespace BoardNS
 				cout << "No sharing\n";
 				newValue = Species::GetSpeciesFromID( 0 );
 			}
-			else if ( max == 3 )
+			else if ( max == 3 )	//Assumes all species require 3 to reproduce
 			{
-				//identifier = distance( possNeighbors.begin(), maxIterator ) + 1;
-				//neighbors = max;
-				//newValue = NeighborBehavior( identifier, neighbors );
-				newValue = Species::GetSpeciesFromID( distance( possNeighbors.begin(), maxIterator ) + 1 );
+				newValue = Species::GetSpeciesFromID( distance( possNeighbors.begin(), maxIterator ));
 			}
 		}
+
+		return newValue;
 	}
 
 	//************************************************
