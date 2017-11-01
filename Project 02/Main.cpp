@@ -16,9 +16,7 @@ int main()
 	Species::AddSpecToList( deadSpec, Species::GetSpecList() );
 	Species instSpec;	//Species instance. Class keyword needed or constructor isn't found
 	Species::AddSpecToList( instSpec, Species::GetSpecList() );
-	Board instBoard;	//Board instance
-	
-	
+	Board instBoard;	//Board instance	
 
 	do
 	{

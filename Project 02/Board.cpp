@@ -12,7 +12,7 @@ namespace BoardNS
 	int down = 10;
 	const int defaultSize = 10;			//Size of the board if no custom values are entered
 	vector< vector<Species> > board;		//Acts like a 2D array (like int[][] in Java)
-	//int deadIdentifier = 0;				//Squares with this identifier value are considered "dead"
+	int deadIdentifier = 0;				//Squares with this identifier value are considered "dead"
 
 
 	//************************************************
@@ -34,9 +34,13 @@ namespace BoardNS
 			{ 0,0,0,0,0,0,0,0,0,0 }
 		} };
 		ConstructBoard( ParseIntBoard( layout ) );
-		//SetHeight( board.size() );
-		//SetWidth( board[0].size() );
-		//board.resize(defaultSize, vector<int>(defaultSize, deadIdentifier));
+	}
+
+	//************************************************
+
+	Board::Board( int down, int across ) : Board::Board( vector<vector<Species>>( down, vector<Species>( across, Species::GetSpeciesFromID( 0 ) ) ) )
+	{
+		//This constuctor delegates (calls) to the constructor that accepts a 2D vector of Species
 	}
 
 	//************************************************
@@ -48,34 +52,17 @@ namespace BoardNS
 
 	//************************************************
 
-	Board::Board( int down, int across )
-	{
-		SetHeight( down );
-		SetWidth( across );
-		GetBoard().resize( down, vector<Species>( across, deadIdentifier ) );
-
-	}
-
-	//************************************************
-
 	//Transforms a board of Species identifiers into a board of Species
 	vector<vector<Species>> Board::ParseIntBoard(vector<vector<int>> intBoard)
 	{
 		vector<vector<Species>> specBoard;
 		specBoard.resize( intBoard.size() );
-		for ( unsigned int x = 0; x < intBoard.size(); x++ )
+		for ( unsigned int y = 0; y < intBoard.size(); y++ )
 		{
-			specBoard[x].resize( intBoard[x].size() );
-			for ( unsigned int y = 0; y < intBoard[x].size(); y++ )
+			specBoard[y].resize( intBoard[y].size() );
+			for ( unsigned int x = 0; x < intBoard[y].size(); x++ )
 			{
-				if ( intBoard[x][y] == 0 )
-				{
-					specBoard[x][y] = Species::GetSpeciesFromID( 0 );
-				}
-				else
-				{
-					specBoard[x][y] = Species::GetSpeciesFromID( intBoard[x][y] );
-				}
+				specBoard[y][x] = Species::GetSpeciesFromID( intBoard[y][x] );
 			}
 		}
 		
@@ -98,13 +85,13 @@ namespace BoardNS
 	{
 		system( "cls" );		//Clears screen
 		//cout << "Down = " << down << "     Across = " << across << endl;
-		for ( unsigned int x = 0; x < GetBoard().size(); x++ )
+		for ( unsigned int y = 0; y < GetBoard().size(); y++ )
 		{
-			for ( unsigned int y = 0; y < GetBoard()[x].size(); y++ )
+			for ( unsigned int x = 0; x < GetBoard()[y].size(); x++ )
 			{
-				if ( GetBoard()[x][y].GetIdentifier() != 0 )
+				if ( GetBoard()[y][x].GetIdentifier() != 0 )
 				{
-					cout << GetBoard()[x][y].GetIdentifier() << " ";
+					cout << GetBoard()[y][x].GetIdentifier() << " ";
 				}
 				else
 				{
@@ -121,21 +108,23 @@ namespace BoardNS
 	{
 		int neighbors = 0;
 		vector< vector<Species> > newBoard( GetBoard() );		//Makes copy of old board. Old values will be overwritten in the copy, so no need to make an empty copy.
-		vector< vector<int> > checkLayout =			//3x3 Square centered on the current board square. 1 = check in this direction. 0 = dont check in this direction
+		vector< vector<int> > masterCheck =			//3x3 Square centered on the current board square. 1 = check in this direction. 0 = dont check in this direction
 		{ {				//Extra brackets needed
 			{ 1, 1, 1 },
 			{ 1, 0, 1 },
 			{ 1, 1, 1 }
 		} };
 
-		vector< vector<int> > dirCheck;// = checkLayout;		//Copy checkLayout so we can make changes to the copy
-		
-		for ( unsigned int x = 0; x < GetBoard().size(); x++ )
+		vector< vector<int> > vertCheck;	//Will hold modified masterCheck 2D vector. Will possibly have its first or last row (XOR) changed to all 0.
+		vector< vector<int> > bothCheck;	//Will hold a modified vertCheck 2D vector. Will possibly have its first or last column (XOR) changed to all 0.
+
+		for ( unsigned int y = 0; y < GetBoard().size(); y++ )
 		{
-			for ( unsigned int y = 0; y < GetBoard()[x].size(); y++ )
+			vertCheck = CheckVertBounds( y, masterCheck );
+			for ( unsigned int x = 0; x < GetBoard()[y].size(); x++ )
 			{
-				dirCheck = CheckBounds( x, y, checkLayout );	//Check bounds to make sure we don't attempt to check out of bounds of an array
-				newBoard[x][y] = CheckDirections( x, y, dirCheck );
+				bothCheck = CheckHorizBounds( x, vertCheck );	//Check bounds to make sure we don't attempt to check out of bounds of an array
+				newBoard[y][x] = CheckDirections( y, x, bothCheck );
 			}
 		}
 		SetBoard( newBoard );
@@ -143,48 +132,55 @@ namespace BoardNS
 
 	//************************************************
 
-	//Modifies the 3x3 checkLayout vector based on the current position on the board
-	vector< vector<int> > Board::CheckBounds( int x, int y, vector< vector<int> > checkLayout )
+	//Modifies the 3x3 checkLayout vector based on the current position on the board. Separated from horizCheck so vertical bounds aren't unnecessarily checked while moving across a row.
+	vector< vector<int> > Board::CheckVertBounds( int y, vector< vector<int> > masterCheck )
 	{
 		//Check bounds
-		if ( x == 0 )
-		{
-			checkLayout[0][0] = 0;
-			checkLayout[0][1] = 0;
-			checkLayout[0][2] = 0;
-		}
-		else if ( x == down - 1 )
-		{
-			checkLayout[2][0] = 0;
-			checkLayout[2][1] = 0;
-			checkLayout[2][2] = 0;
-		}
-
 		if ( y == 0 )
 		{
-			checkLayout[0][0] = 0;
-			checkLayout[1][0] = 0;
-			checkLayout[2][0] = 0;
+			masterCheck[0][0] = 0;
+			masterCheck[0][1] = 0;
+			masterCheck[0][2] = 0;
 		}
-		else if ( y == across - 1 )
+		else if ( y == down - 1 )
 		{
-			checkLayout[0][2] = 0;
-			checkLayout[1][2] = 0;
-			checkLayout[2][2] = 0;
+			masterCheck[2][0] = 0;
+			masterCheck[2][1] = 0;
+			masterCheck[2][2] = 0;
 		}
 
-		//DBG_Print2DVector( checkLayout );
-
-		return checkLayout;
+		return masterCheck;
 	}
 
 	//************************************************
 
-	//Check the neighbors of the current board square using the 3x3 checkLayout vector as a guide
-	Species Board::CheckDirections( int x, int y, vector< vector<int> > dirCheck )
+	vector< vector<int> > Board::CheckHorizBounds( int x, vector< vector<int> > vertCheck )
 	{
-		int identifier = GetBoard()[x][y].GetIdentifier();
-		Species newValue;
+		if ( x == 0 )
+		{
+			vertCheck[0][0] = 0;
+			vertCheck[1][0] = 0;
+			vertCheck[2][0] = 0;
+		}
+		else if ( x == across - 1 )
+		{
+			vertCheck[0][2] = 0;
+			vertCheck[1][2] = 0;
+			vertCheck[2][2] = 0;
+		}
+
+		//DBG_Print2DVector( checkLayout );
+
+		return vertCheck;
+	}
+
+	//************************************************
+
+	//Check the neighbors of the current board square using the 3x3 checkLayout vector as a guide and determine what the current square should change to
+	Species Board::CheckDirections( int y, int x, vector< vector<int> > bothCheck )
+	{
+		int identifier = GetBoard()[y][x].GetIdentifier();
+		Species newValue( Species::GetSpeciesFromID( 0 ) );
 
 		//Used for checking neighbors of living cells
 		int neighbors = 0;
@@ -217,21 +213,21 @@ namespace BoardNS
 			thisType = DEAD;
 		}
 
-		for ( unsigned int a = 0; a < dirCheck.size(); a++ )
+		for ( unsigned int a = 0; a < bothCheck.size(); a++ )
 		{
-			for ( unsigned int b = 0; b < dirCheck[a].size(); b++ )
+			for ( unsigned int b = 0; b < bothCheck[a].size(); b++ )
 			{
-				if ( dirCheck[a][b] != 0 )	//Check in this direction
+				if ( bothCheck[a][b] != 0 )	//Check in this direction
 				{
 					//cout << "[a][b] = [" << a << "][" << b << "]\n\n";
-					int neighborID = GetBoard()[x + a - 1][y + b - 1].GetIdentifier();
-					
+					int neighborID = GetBoard()[y + a - 1][x + b - 1].GetIdentifier();
+
 					if ( neighborID != 0 )	//Living neighbor...
 					{
 						if ( thisType == LIVING )
 						{
-							
-							if ( neighborID == GetBoard()[x][y].GetIdentifier() )	//... of same species.
+
+							if ( neighborID == GetBoard()[y][x].GetIdentifier() )	//... of same species.
 							{
 								neighbors++;
 							}
@@ -240,7 +236,7 @@ namespace BoardNS
 								//Check if helpful
 								for ( unsigned int i = 0; i < helpers.size(); i++ )
 								{
-									if ( dirCheck[a][b] == helpers[i].GetIdentifier() )
+									if ( bothCheck[a][b] == helpers[i].GetIdentifier() )
 									{
 										neighbors++;
 									}
@@ -249,7 +245,7 @@ namespace BoardNS
 								//Check if harmful
 								for ( unsigned int i = 0; i < killers.size(); i++ )
 								{
-									if ( dirCheck[a][b] == killers[i].GetIdentifier() )
+									if ( bothCheck[a][b] == killers[i].GetIdentifier() )
 									{
 										neighbors--;
 									}
@@ -272,15 +268,15 @@ namespace BoardNS
 		}
 		if ( thisType == LIVING )
 		{
-			newValue = NeighborBehavior( GetBoard()[x][y], neighbors );
+			newValue = NeighborBehavior( GetBoard()[y][x], neighbors );
 		}
 		else if ( thisType == DEAD )
 		{
-			newValue = NeighborConflict(possNeighbors);
+			newValue = NeighborConflict( possNeighbors );
 		}
 
 		//cout << "board[" << x << "][" <<y << "] has " << neighbors << " living neighbors. New value = " << newValue << endl;
-		
+
 		return newValue;
 	}
 
@@ -418,11 +414,11 @@ namespace BoardNS
 	void Board::DBG_Print2DVector( vector< vector<int> > v )
 	{
 		cout << "DEBUG - Print 2D vector:\n";
-		for ( unsigned int x = 0; x < v.size(); x++ )
+		for ( unsigned int y = 0; y < v.size(); y++ )
 		{
-			for ( unsigned int y = 0; y < v[x].size(); y++ )
+			for ( unsigned int x = 0; x < v[y].size(); x++ )
 			{
-				cout << v[x][y] << " ";
+				cout << v[y][x] << " ";
 			}
 			cout << endl;
 		}
