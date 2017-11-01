@@ -1,6 +1,4 @@
 #pragma once
-#ifndef BOARD_H
-#define BOARD_H
 
 #include <array>
 #include "Species.h"
@@ -39,13 +37,11 @@ namespace BoardNS
 		void SetHeight( int );
 		void SetWidth( int );
 	public:
-		vector< vector<Species> > GetBoard();
-		int GetHeight();
-		int GetWidth();
+		vector< vector<Species> > GetBoard() const;
+		int GetHeight() const;
+		int GetWidth() const;
 
 		void DBG_PrintVector( vector<Species> );
 		void DBG_Print2DVector( vector< vector<int> > );
 	};
 }
-
-#endif

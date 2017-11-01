@@ -13,9 +13,9 @@ int main()
 
 	//Create board, populate it with species identifiers, run time ticks
 	Species deadSpec(0, 0);
-	Species::AddSpecToList( deadSpec, Species::GetSpecList() );
+	deadSpec.AddSpecToList( deadSpec, Species::GetSpecList(), Species::listType::SPEC );
 	Species instSpec;	//Species instance. Class keyword needed or constructor isn't found
-	Species::AddSpecToList( instSpec, Species::GetSpecList() );
+	instSpec.AddSpecToList( instSpec, Species::GetSpecList(), Species::listType::SPEC );
 	Board instBoard;	//Board instance	
 
 	do

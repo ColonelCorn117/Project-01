@@ -1,6 +1,4 @@
 #pragma once
-#ifndef SPECIES_H
-#define SPECIES_H
 
 #include <vector>
 using namespace std;
@@ -15,27 +13,33 @@ namespace SpeciesNS
 		int identifier;
 		int minAdj;
 		int maxAdj;
-		//char consoleOutput = 'a';	//Representation of this Species in the console window
-		vector<Species> killedBy;
+		//char consoleOutput = 'a';		//Representation of this Species in the console window
 		vector<Species> helpedBy;
-
+		vector<Species> killedBy;
 	public:
-		//Species();
+		enum listType
+		{
+			SPEC,
+			HELP,
+			KILL
+		};
+
+	
 		Species( int = 2, int = 3 );
-		static void AddSpecToList( Species, vector<Species> );
-		static vector<Species> GetSpecList();
+		void AddSpecToList( Species, vector<Species>, listType );
 		static Species GetSpeciesFromID( int );
+		static vector<Species> GetSpecList();
 		vector<Species> GetHelpers();
 		vector<Species> GetKillers();
 		int GetIdentifier();
 		int GetMinAdj();
 		int GetMaxAdj();
+	private:
 		static void SetSpecList( vector<Species> );
+		void SetHelpers( vector<Species> );
+		void SetKillers( vector<Species> );
 		void SetIdentifier( int );
 		void SetMinAdj( int );
 		void SetMaxAdj( int );
-		
 	};
 }
-
-#endif

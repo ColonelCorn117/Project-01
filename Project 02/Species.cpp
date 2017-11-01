@@ -10,14 +10,7 @@ namespace SpeciesNS
 	int identifier = 1;			//Number used to idenify this species on any square of the any Board
 	int minAdj = 2;				//Minimum number of adjacent "living" squares of same or helpful species needed for any square of this species to stay alive (less than this = underpopulation)
 	int maxAdj = 3;				//Maximum number of adjacent "living" squares of same or helpful species needed for any square of this species to stay alive (more than this = overpopulation)
-
-	//************************************************
-
-	//Species::Species() : Species( 2, 3 )	//Calls other constructor using default values
-	//{
-	//	//nothing
-	//}
-
+	
 	//************************************************
 
 	Species::Species( int minAdj, int maxAdj )
@@ -26,18 +19,30 @@ namespace SpeciesNS
 		int id = GetSpecList().size();
 		SetIdentifier( id );
 		SetMinAdj( minAdj );
-		SetMaxAdj( maxAdj );
-		//specList.resize( newSpec );
-		//specList.push_back( *this );		
+		SetMaxAdj( maxAdj );	
 	}
 
 	//************************************************
 
-	void Species::AddSpecToList( Species spec, vector<Species> list )
+	void Species::AddSpecToList( Species spec, vector<Species> list, listType type)
 	{
-		//list.resize( list.size() + 1 );
-		list.push_back( spec );			//Increase temp Species list size and add this Species to it
-		SetSpecList( list );			//Overwrite the Species lists with the temp
+		list.push_back( spec );			//Increase temp list size and add this Species to it
+		switch ( type )
+		{
+			case( SPEC ):
+				SetSpecList( list );			//Overwrite the desired list with the updated temp list
+				break;
+			case( HELP ):
+				SetHelpers( list );
+				break;
+			case ( KILL ):
+				SetKillers( list );
+				break;
+			default:
+				cout << "\n\nError in Species.cpp - Invalid listType\n\n";
+		}
+		
+		
 	}
 
 	//************************************************
@@ -91,9 +96,23 @@ namespace SpeciesNS
 
 	//************************************************
 
-	void Species::SetSpecList( vector<Species> specList )
+	void Species::SetSpecList( vector<Species> list )
 	{
-		Species::specList = specList;
+		Species::specList = list;
+	}
+
+	//************************************************
+
+	void Species::SetHelpers( vector<Species> list )
+	{
+		this->helpedBy = list;
+	}
+
+	//************************************************
+
+	void Species::SetKillers( vector<Species> list )
+	{
+		this->killedBy = list;
 	}
 
 	//************************************************

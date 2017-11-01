@@ -8,8 +8,8 @@ using namespace SpeciesNS;
 
 namespace BoardNS
 {
-	int across = 10;
 	int down = 10;
+	int across = 10;
 	const int defaultSize = 10;			//Size of the board if no custom values are entered
 	vector< vector<Species> > board;		//Acts like a 2D array (like int[][] in Java)
 	int deadIdentifier = 0;				//Squares with this identifier value are considered "dead"
@@ -376,21 +376,21 @@ namespace BoardNS
 
 	//************************************************
 
-	vector< vector<Species> > Board::GetBoard()
+	vector< vector<Species> > Board::GetBoard() const
 	{
 		return this->board;
 	}
 
 	//************************************************
 
-	int Board::GetHeight()
+	int Board::GetHeight() const
 	{
 		return this->down;
 	}
 
 	//************************************************
 
-	int Board::GetWidth()
+	int Board::GetWidth() const
 	{
 		return this->across;
 	}
