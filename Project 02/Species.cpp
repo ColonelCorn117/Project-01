@@ -24,25 +24,52 @@ namespace SpeciesNS
 
 	//************************************************
 
-	void Species::AddSpecToList( Species spec, vector<Species> list, listType type)
+	void Species::AddSpecToList()
 	{
-		list.push_back( spec );			//Increase temp list size and add this Species to it
+		Species::specList.push_back( *this );
+	}
+
+	//************************************************
+
+	void Species::AddSpecToList( Species spec, listType type )
+	{
+		//list.push_back( spec );			//Increase temp list size and add this Species to it
 		switch ( type )
 		{
-			case( SPEC ):
-				SetSpecList( list );			//Overwrite the desired list with the updated temp list
-				break;
 			case( HELP ):
-				SetHelpers( list );
+				AddHelper( spec );
 				break;
 			case ( KILL ):
-				SetKillers( list );
+				AddKiller( spec );
 				break;
 			default:
-				cout << "\n\nError in Species.cpp - Invalid listType\n\n";
+				cout << "\n\nError in Species.cpp - Invalid listType (Add)\n\n";
 		}
-		
-		
+	}
+
+	//************************************************
+
+	void Species::RemoveSpecFromList( Species spec, listType type )
+	{		
+		switch ( type )
+		{
+			case( HELP ):
+				RemoveHelper( spec );
+				break;
+			case ( KILL ):
+				RemoveKiller( spec );
+				break;
+			default:
+				cout << "\n\nError in Species.cpp - Invalid listType (Remove)\n\n";
+		}
+	}
+
+	//************************************************
+
+	Species Species::GetSpeciesFromID(int id)
+	{
+		/*cout << "ID = " << id << endl;*/
+		return GetSpecList()[id];
 	}
 
 	//************************************************
@@ -50,13 +77,6 @@ namespace SpeciesNS
 	vector<Species> Species::GetSpecList()
 	{
 		return Species::specList;
-	}
-
-	//************************************************
-
-	Species Species::GetSpeciesFromID(int id)
-	{
-		return GetSpecList()[id];
 	}
 
 	//************************************************
@@ -96,35 +116,14 @@ namespace SpeciesNS
 
 	//************************************************
 
-	void Species::SetSpecList( vector<Species> list )
-	{
-		Species::specList = list;
-	}
-
-	//************************************************
-
-	void Species::SetHelpers( vector<Species> list )
-	{
-		this->helpedBy = list;
-	}
-
-	//************************************************
-
-	void Species::SetKillers( vector<Species> list )
-	{
-		this->killedBy = list;
-	}
-
-	//************************************************
-
-	void Species::SetIdentifier(int identifier)
+	void Species::SetIdentifier( int identifier )
 	{
 		this->identifier = identifier;;
 	}
 
 	//************************************************
 
-	void Species::SetMinAdj(int minAdj)
+	void Species::SetMinAdj( int minAdj )
 	{
 		this->minAdj = minAdj;
 	}
@@ -135,5 +134,97 @@ namespace SpeciesNS
 	{
 		this->maxAdj = maxAdj;
 	}
+
+	//************************************************
+
+	void Species::AddHelper( Species spec )
+	{
+		bool addHelper = true;
+		if ( GetHelpers().size() > 0 )
+		{
+			for each ( Species helper in this->GetHelpers() )
+			{
+				if ( helper.GetIdentifier() == spec.GetIdentifier() )
+				{
+					addHelper = false;
+					break;
+				}
+			}
+		}
+
+		if ( addHelper )
+		{
+			this->GetHelpers().push_back( spec );
+		}
+		else
+		{
+			cout << "Species is already a Helper.\n";
+		}
+		
+	}
+
+	//************************************************
+
+	void Species::AddKiller( Species spec )
+	{
+		bool addKiller = true;
+		if ( GetKillers().size() > 0 )
+		{
+			for each ( Species killer in this->GetKillers() )
+			{
+				if ( killer.GetIdentifier() == spec.GetIdentifier() )
+				{
+					addKiller = false;
+					break;
+				}
+			}
+		}
+
+		if ( addKiller )
+		{
+			this->GetKillers().push_back( spec );
+		}
+		else
+		{
+			cout << "Species is already a Killer.\n";
+		}
+	}
+
+	//************************************************
+
+	void Species::RemoveHelper( Species spec )
+	{
+
+	}
+
+	//************************************************
+
+	void Species::RemoveKiller( Species spec )
+	{
+
+	}
+
+	//************************************************
+
+	//void Species::SetSpecList( vector<Species> list )
+	//{
+	//	Species::specList = list;
+	//}
+
+	////************************************************
+
+	//void Species::SetHelpers( vector<Species> list )
+	//{
+	//	this->helpedBy = list;
+	//}
+
+	////************************************************
+
+	//void Species::SetKillers( vector<Species> list )
+	//{
+	//	this->killedBy = list;
+	//}
+
+	
 	
 }
