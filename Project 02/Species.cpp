@@ -4,12 +4,12 @@
 
 namespace SpeciesNS
 {
-	vector<Species> Species::specList;	//List of every Species
-	vector<Species> killedBy;		//List of Species that this Species is killed by
-	vector<Species> helpedBy;		//List of Species that this Species is helped survive by
-	int identifier = 1;			//Number used to idenify this species on any square of the any Board
-	int minAdj = 2;				//Minimum number of adjacent "living" squares of same or helpful species needed for any square of this species to stay alive (less than this = underpopulation)
-	int maxAdj = 3;				//Maximum number of adjacent "living" squares of same or helpful species needed for any square of this species to stay alive (more than this = overpopulation)
+	vector<Species*> Species::specList;	//List of every Species
+	//vector<Species> killedBy;		//List of Species that this Species is killed by
+	//vector<Species> helpedBy;		//List of Species that this Species is helped survive by
+	//int identifier = 1;			//Number used to idenify this species on any square of the any Board
+	//int minAdj = 2;				//Minimum number of adjacent "living" squares of same or helpful species needed for any square of this species to stay alive (less than this = underpopulation)
+	//int maxAdj = 3;				//Maximum number of adjacent "living" squares of same or helpful species needed for any square of this species to stay alive (more than this = overpopulation)
 	
 	//************************************************
 
@@ -17,30 +17,30 @@ namespace SpeciesNS
 	{
 		//cout << specList.size();
 		int id = GetSpecList().size();
-		SetIdentifier( id );
-		SetMinAdj( minAdj );
-		SetMaxAdj( maxAdj );	
+		this->SetIdentifier( id );
+		this->SetMinAdj( minAdj );
+		this->SetMaxAdj( maxAdj );
 	}
 
 	//************************************************
 
 	void Species::AddSpecToList()
 	{
-		Species::specList.push_back( *this );
+		Species::specList.push_back( this );
 	}
 
 	//************************************************
 
-	void Species::AddSpecToList( Species spec, listType type )
+	void Species::AddSpecToList( Species* spec, listType type )
 	{
 		//list.push_back( spec );			//Increase temp list size and add this Species to it
 		switch ( type )
 		{
 			case( HELP ):
-				AddHelper( spec );
+				this->AddHelper( spec );
 				break;
 			case ( KILL ):
-				AddKiller( spec );
+				this->AddKiller( spec );
 				break;
 			default:
 				cout << "\n\nError in Species.cpp - Invalid listType (Add)\n\n";
@@ -49,15 +49,15 @@ namespace SpeciesNS
 
 	//************************************************
 
-	void Species::RemoveSpecFromList( Species spec, listType type )
+	void Species::RemoveSpecFromList( Species* spec, listType type )
 	{		
 		switch ( type )
 		{
 			case( HELP ):
-				RemoveHelper( spec );
+				this->RemoveHelper( spec );
 				break;
 			case ( KILL ):
-				RemoveKiller( spec );
+				this->RemoveKiller( spec );
 				break;
 			default:
 				cout << "\n\nError in Species.cpp - Invalid listType (Remove)\n\n";
@@ -66,7 +66,7 @@ namespace SpeciesNS
 
 	//************************************************
 
-	Species Species::GetSpeciesFromID(int id)
+	Species* Species::GetSpeciesFromID(int id)
 	{
 		/*cout << "ID = " << id << endl;*/
 		return GetSpecList()[id];
@@ -74,42 +74,42 @@ namespace SpeciesNS
 
 	//************************************************
 
-	vector<Species> Species::GetSpecList()
+	vector<Species*> Species::GetSpecList()
 	{
 		return Species::specList;
 	}
 
 	//************************************************
 
-	vector<Species> Species::GetHelpers()
+	vector<Species*> Species::GetHelpers() const
 	{
 		return helpedBy;
 	}
 
 	//************************************************
 
-	vector<Species> Species::GetKillers()
+	vector<Species*> Species::GetKillers() const
 	{
 		return killedBy;
 	}
 
 	//************************************************
 
-	int Species::GetIdentifier()
+	int Species::GetIdentifier() const
 	{
 		return identifier;
 	}
 
 	//************************************************
 
-	int Species::GetMinAdj()
+	int Species::GetMinAdj() const
 	{
 		return this->minAdj;
 	}
 
 	//************************************************
 
-	int Species::GetMaxAdj()
+	int Species::GetMaxAdj() const
 	{
 		return this->maxAdj;
 	}
@@ -118,7 +118,7 @@ namespace SpeciesNS
 
 	void Species::SetIdentifier( int identifier )
 	{
-		this->identifier = identifier;;
+		this->identifier = identifier;
 	}
 
 	//************************************************
@@ -137,14 +137,14 @@ namespace SpeciesNS
 
 	//************************************************
 
-	void Species::AddHelper( Species spec )
+	void Species::AddHelper( Species* spec )
 	{
 		bool addHelper = true;
 		if ( GetHelpers().size() > 0 )
 		{
-			for each ( Species helper in this->GetHelpers() )
+			for each ( Species* helper in this->GetHelpers() )
 			{
-				if ( helper.GetIdentifier() == spec.GetIdentifier() )
+				if ( helper->GetIdentifier() == spec->GetIdentifier() )
 				{
 					addHelper = false;
 					break;
@@ -154,7 +154,7 @@ namespace SpeciesNS
 
 		if ( addHelper )
 		{
-			this->GetHelpers().push_back( spec );
+			this->helpedBy.push_back( spec );
 		}
 		else
 		{
@@ -165,14 +165,14 @@ namespace SpeciesNS
 
 	//************************************************
 
-	void Species::AddKiller( Species spec )
+	void Species::AddKiller( Species* spec )
 	{
 		bool addKiller = true;
 		if ( GetKillers().size() > 0 )
 		{
-			for each ( Species killer in this->GetKillers() )
+			for each ( Species* killer in this->GetKillers() )
 			{
-				if ( killer.GetIdentifier() == spec.GetIdentifier() )
+				if ( killer->GetIdentifier() == spec->GetIdentifier() )
 				{
 					addKiller = false;
 					break;
@@ -182,7 +182,7 @@ namespace SpeciesNS
 
 		if ( addKiller )
 		{
-			this->GetKillers().push_back( spec );
+			this->killedBy.push_back( spec );
 		}
 		else
 		{
@@ -192,14 +192,14 @@ namespace SpeciesNS
 
 	//************************************************
 
-	void Species::RemoveHelper( Species spec )
+	void Species::RemoveHelper( Species* spec )
 	{
 
 	}
 
 	//************************************************
 
-	void Species::RemoveKiller( Species spec )
+	void Species::RemoveKiller( Species* spec )
 	{
 
 	}
